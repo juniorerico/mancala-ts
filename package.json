@@ -1,0 +1,22 @@
+{
+  "name": "mancala-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.24",
+    "ts-jest": "^27.0.4",
+    "ts-node": "^10.1.0"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "tsc",
+    "start": "tsc && node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
