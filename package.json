@@ -8,13 +8,14 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.24",
+    "jest": "^27.0.6",
     "ts-jest": "^27.0.4",
     "ts-node": "^10.1.0"
   },
   "scripts": {
-    "test": "jest",
-    "build": "tsc",
-    "start": "tsc && node dist/index.js"
+    "test": "npm run build && jest --verbose",
+    "build": "tsc --build --verbose",
+    "start": "npm run build && node dist/src/index.js"
   },
   "keywords": [],
   "author": "",
