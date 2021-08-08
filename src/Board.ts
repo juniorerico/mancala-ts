@@ -62,9 +62,7 @@ export class Board {
    */
   makeMove(holeIndex: number) {
     if (!this.isMoveValid(this.currentPlayer, holeIndex)) {
-      throw new Error(
-        "Can't make a move. Move not valid for the current player."
-      );
+      throw new Error("Can't make a move. Move not valid for the current player.");
     }
 
     let playerIndex = this.players.indexOf(this.currentPlayer);
@@ -73,7 +71,7 @@ export class Board {
     currentHole = this.distributeStones(currentHole);
 
     // count the scores
-    while (currentHole.stones == 2 || currentHole.stones == 3) {
+    while ((currentHole.stones == 2 || currentHole.stones == 3) && currentHole.row != playerIndex) {
       // increase the user's score
       this.scores[playerIndex] += currentHole.stones;
       currentHole.stones = 0;
@@ -137,7 +135,7 @@ export class Board {
    * @param holeIndex
    * @returns
    */
-  private isMoveValid(player: Player, holeIndex: number): boolean {
+  isMoveValid(player: Player, holeIndex: number): boolean {
     let possibleMoves: number[] = this.getPossibleMoves(this.currentPlayer);
     return possibleMoves.includes(holeIndex);
   }
@@ -146,11 +144,7 @@ export class Board {
    * Check if the game is over
    */
   isGameOver(): boolean {
-    if (
-      this.scores[0] >= 24 ||
-      this.scores[1] >= 24 ||
-      this.getPossibleMoves(this.currentPlayer).length == 0
-    ) {
+    if (this.scores[0] >= 24 || this.scores[1] >= 24 || this.getPossibleMoves(this.currentPlayer).length == 0) {
       return true;
     } else {
       return false;
@@ -171,17 +165,11 @@ export class Board {
 
     let playerHoles: Hole[] = this.holes[playerIndex];
     let possibleIndexes: number[] = [];
-    let holesWithMoreThanOneStone: number = playerHoles.filter(
-      (hole) => hole.stones > 1
-    ).length;
+    let holesWithMoreThanOneStone: number = playerHoles.filter((hole) => hole.stones > 1).length;
 
     playerHoles.forEach((hole, holeIndex) => {
       if (hole.stones > 0) {
-        if (
-          hole.stones > 1 ||
-          (hole.stones == 1 && holesWithMoreThanOneStone == 0)
-        )
-          possibleIndexes.push(holeIndex);
+        if (hole.stones > 1 || (hole.stones == 1 && holesWithMoreThanOneStone == 0)) possibleIndexes.push(holeIndex);
       }
     });
 

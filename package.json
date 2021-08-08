@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "lodash": "^4.17.21",
     "typescript": "^4.3.5"
   },
   "devDependencies": {
@@ -15,7 +16,8 @@
   "scripts": {
     "test": "npm run build && jest --verbose",
     "build": "tsc --build --verbose",
-    "start": "npm run build && node dist/src/index.js"
+    "start": "npm run build && node dist/src/index.js",
+    "console-game": "npm run build && node dist/src/console-game.js"
   },
   "keywords": [],
   "author": "",
