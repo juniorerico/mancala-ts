@@ -35,28 +35,21 @@ describe("makeMove should distribute the stones to the other holes in a counter 
         [4, 4, 4, 4, 0, 5],
       ],
     },
-  ])(
-    "makeMove($holeIndex) as the player $playerIndex on initial board",
-    ({ playerIndex, holeIndex, expectedHoleState }) => {
-      test(`will leave the board as [${expectedHoleState}]`, () => {
-        let board = new Board();
+  ])("makeMove($holeIndex) as the player $playerIndex on initial board", ({ playerIndex, holeIndex, expectedHoleState }) => {
+    test(`will leave the board as [${expectedHoleState}]`, () => {
+      let board = new Board();
 
-        board.currentPlayer = board.players[playerIndex];
-        board.makeMove(holeIndex);
+      board.currentPlayer = board.players[playerIndex];
+      board.makeMove(holeIndex);
 
-        // convert the Hole array to an array of numbers. To be easy to compare
-        let currentHoleState = board.holes.map((row) =>
-          row.map((hole) => hole.stones)
-        );
+      // convert the Hole array to an array of numbers. To be easy to compare
+      let currentHoleState = board.holes.map((row) => row.map((hole) => hole.stones));
 
-        expect(currentHoleState).toEqual(
-          expect.arrayContaining(expectedHoleState)
-        );
+      expect(currentHoleState).toEqual(expect.arrayContaining(expectedHoleState));
 
-        expect(board.scores).toEqual(expect.arrayContaining([0, 0]));
-      });
-    }
-  );
+      expect(board.scores).toEqual(expect.arrayContaining([0, 0]));
+    });
+  });
 
   test("makeMove should switch the current player", () => {
     let board = new Board();
