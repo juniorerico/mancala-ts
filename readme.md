@@ -1,4 +1,4 @@
-# Foobar
+# mancala-ts
 
 This is a simple project created just for fun and for purposes of studying React with typescript and also, play the game Mancala. Mancala is an ancient simple game usually played by two people in the sand with stones. [Learn more](https://en.wikipedia.org/wiki/Mancala)
 
