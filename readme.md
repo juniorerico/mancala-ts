@@ -13,8 +13,6 @@ npm install
 ## Usage
 
 ```bash
-import foobar
-
 # run the simple console game
 npm run console-game
 
