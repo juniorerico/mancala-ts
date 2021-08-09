@@ -1,4 +1,4 @@
-import { Board } from "../../src/Board";
+import { Board } from "../../lib/Board";
 
 // 'makeMove' tests
 describe("makeMove should distribute the stones to the other holes in a counter clockwise order", () => {

@@ -1,7 +1,7 @@
 // Implementação teste só pra testar o código..
 
-import { Board } from "./Board";
-import { bestMove } from "./minimax";
+import { Board } from "./lib/Board";
+import { bestMove } from "./lib/minimax";
 
 console.log("Mancala game");
 console.log("Creating board...");

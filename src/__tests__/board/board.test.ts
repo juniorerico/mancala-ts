@@ -1,4 +1,4 @@
-import { Board, Hole } from "../../src/Board";
+import { Board, Hole } from "../../lib/Board";
 
 // 'getPossibleMoves' tests
 describe("'getPossibleMoves' tests", () => {
