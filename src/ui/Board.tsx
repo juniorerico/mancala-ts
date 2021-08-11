@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
+import Hole from "./Hole";
 import styled from "styled-components";
 
 // Styled components
 
 // Board container
 const Container = styled.div`
+  position: relative;
+
   &.rotated {
     top: 0px;
     transform: rotate(90deg) translateY(-100%);
@@ -13,6 +16,7 @@ const Container = styled.div`
 
   &.rotated > .board-img {
     width: 97.5vh;
+    width: calc(var(--vh, 1vh) * 97.5);
   }
 `;
 
@@ -38,21 +42,50 @@ const PlayableArea = styled.div`
 // | Player 1 store | holes | Player 2 store |
 const Section = styled.div`
   height: 80%;
-  top: 9%;
   z-index: 1;
 `;
 
-const PlayerOneStoreSection = styled(Section)`
-  width: 12.5%;
+const PlayerZeroStoreSection = styled(Section)`
+  width: 17%;
+  display: flex;
+  justify-content: center;
 `;
 
-const PlayerTwoStoreSection = styled(Section)`
-  width: 12.5%;
+const PlayerOneStoreSection = styled(Section)`
+  width: 17%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
 `;
 
 const HolesSection = styled(Section)`
+  display: flex;
+  flex-direction: column;
   width: 66%;
-  top: 9%;
+`;
+
+const PlayerStore = styled.div`
+  height: 85%;
+  width: 55%;
+  border-bottom-right-radius: 300px;
+  border-bottom-left-radius: 300px;
+  border-top-right-radius: 300px;
+  border-top-left-radius: 300px;
+  background-color: #5e43255e;
+  box-shadow: inset 0px 9px 3px #5e4325;
+`;
+
+const PlayerHole = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-around;
+`;
+
+const PlayerZeroHoles = styled(PlayerHole)``;
+
+const PlayerOneHoles = styled(PlayerHole)`
+  align-items: flex-end;
 `;
 
 interface Size {
@@ -73,7 +106,11 @@ const Board = ({ className }: BoardProps) => {
 
   // update parameters of the board
   function update() {
-    console.log("image");
+    // create the --vh variable in css for calculating the right height fo mobile phone
+    // This should move to another place, for sure.
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+
     // update the size of the container to match the image size
     setContainerSize({ width: imageRef.width, height: imageRef.height });
 
@@ -99,7 +136,6 @@ const Board = ({ className }: BoardProps) => {
       <BoardImg
         className="board-img"
         src="assets/board.png"
-        style={{}}
         onLoad={() => {
           update();
         }}
@@ -110,10 +146,31 @@ const Board = ({ className }: BoardProps) => {
         }}
       />
 
-      <PlayableArea>
-        <PlayerOneStoreSection style={{ backgroundColor: "red" }}></PlayerOneStoreSection>
-        <HolesSection style={{ backgroundColor: "green" }}></HolesSection>
-        <PlayerTwoStoreSection style={{ backgroundColor: "blue" }}></PlayerTwoStoreSection>
+      <PlayableArea className={"playable-area"}>
+        <PlayerZeroStoreSection className={"player0-store-section"}>
+          <PlayerStore />
+        </PlayerZeroStoreSection>
+        <HolesSection className={"holes-section"}>
+          <PlayerZeroHoles className={"player0-holes"}>
+            <Hole stones={4} />
+            <Hole />
+            <Hole />
+            <Hole />
+            <Hole />
+            <Hole />
+          </PlayerZeroHoles>
+          <PlayerOneHoles className={"player1-holes"}>
+            <Hole />
+            <Hole />
+            <Hole />
+            <Hole />
+            <Hole />
+            <Hole />
+          </PlayerOneHoles>
+        </HolesSection>
+        <PlayerOneStoreSection className={"player1-store-section"}>
+          <PlayerStore />
+        </PlayerOneStoreSection>
       </PlayableArea>
     </Container>
   );
