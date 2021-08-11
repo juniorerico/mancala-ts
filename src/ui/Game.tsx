@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import Board from "./Board";
 
@@ -6,9 +6,6 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
   background-image: url(assets/background.png);
   overflow: hidden;
 `;
@@ -16,7 +13,7 @@ const Container = styled.div`
 function Game() {
   return (
     <Container>
-      <Board className="board" scale={0.975} />
+      <Board className="board" />
     </Container>
   );
 }
