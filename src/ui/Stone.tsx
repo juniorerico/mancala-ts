@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import styled from "styled-components";
+import { Constants } from "../common/Constants";
 
 const Container = styled.div`
   position: absolute;
@@ -76,7 +77,9 @@ const Stone = React.forwardRef<HTMLDivElement, StoneProps>((props, ref) => {
       style={{
         backgroundColor: props.color,
         transition: enableAnimation.current
-          ? `all 700ms ease-out ${props.animationDelay ? props.animationDelay : 250}ms`
+          ? `all ${Constants.ANIMATION_DURATION}ms ease-out ${
+              props.animationDelay ? props.animationDelay : Constants.ANIMATION_DELAY
+            }ms`
           : "none",
         top: props.position.top * scale,
         left: props.position.left * scale,

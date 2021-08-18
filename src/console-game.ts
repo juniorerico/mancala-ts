@@ -28,14 +28,16 @@ stdin.addListener("data", function (data: Buffer) {
     checkGameOver();
 
     console.log("\n\nAI is playing...");
-    let aiMove = makeAIMove();
+    bestMove(board).then((move) => {
+      board.makeMove(move);
 
-    console.log("\nAI played: [" + aiMove + "]");
-    board.print();
+      console.log("\nAI played: [" + move + "]");
+      board.print();
 
-    checkGameOver();
+      checkGameOver();
 
-    console.log("Select a hole index to play: ");
+      console.log("Select a hole index to play: ");
+    });
   } else {
     console.log("Move not valid. Do another one: ");
     board.print();
@@ -48,10 +50,4 @@ function checkGameOver() {
     console.log("Game is over! Player " + winner + " wins! ");
     process.exit();
   }
-}
-
-function makeAIMove(): number {
-  var move = bestMove(board);
-  board.makeMove(move);
-  return move;
 }

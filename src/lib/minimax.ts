@@ -8,22 +8,24 @@ var _ = require("lodash");
  * @param maxDepth max depth the algoritgm is going to search
  * @returns the best move
  */
-export function bestMove(board: Board, maxDepth: number = 6): number {
-  let bestScore = -Infinity;
-  let move = board.getPossibleMoves(board.currentPlayer)[0];
-  let possibleMoves = board.getPossibleMoves(board.currentPlayer);
+export function bestMove(board: Board, maxDepth: number = 6): Promise<number> {
+  return new Promise((resolve) => {
+    let bestScore = -Infinity;
+    let move = board.getPossibleMoves(board.currentPlayer)[0];
+    let possibleMoves = board.getPossibleMoves(board.currentPlayer);
 
-  shuffleArray(possibleMoves).forEach((m) => {
-    let newBoard: Board = _.cloneDeep(board);
-    newBoard.makeMove(m);
-    let score = minimax(newBoard, maxDepth, true, -Infinity, Infinity);
-    if (score > bestScore) {
-      bestScore = score;
-      move = m;
-    }
+    shuffleArray(possibleMoves).forEach((m) => {
+      let newBoard: Board = _.cloneDeep(board);
+      newBoard.makeMove(m);
+      let score = minimax(newBoard, maxDepth, true, -Infinity, Infinity);
+      if (score > bestScore) {
+        bestScore = score;
+        move = m;
+      }
+    });
+
+    resolve(move);
   });
-
-  return move;
 }
 
 /**
@@ -46,7 +48,13 @@ function shuffleArray(array: any[]) {
  * @param beta
  * @returns
  */
-function minimax(board: Board, depth: number, maximizingPlayer: boolean, alpha: number = -Infinity, beta: number = Infinity): number {
+function minimax(
+  board: Board,
+  depth: number,
+  maximizingPlayer: boolean,
+  alpha: number = -Infinity,
+  beta: number = Infinity
+): number {
   if (depth == 0 || board.isGameOver()) {
     return board.scores[0] - board.scores[1];
   }

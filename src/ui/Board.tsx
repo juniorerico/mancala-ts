@@ -1,10 +1,13 @@
+import _ from "lodash";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useWindowResize } from "beautiful-react-hooks";
 import Hole from "./Hole";
 import styled from "styled-components";
 import Stone from "./Stone";
 import Store from "./Store";
-import { Constants, StoneColors, STONES_PER_HOLE } from "../common/Constants";
+import { Board as ControlBoard } from "../lib/Board";
+import { bestMove } from "../lib/minimax";
+import { Constants, StoneColors } from "../common/Constants";
 
 // Styled components
 
@@ -56,6 +59,11 @@ const PlayerHoles = styled.div`
   justify-content: space-around;
 `;
 
+interface Index {
+  row: number;
+  col: number;
+}
+
 interface Size {
   width: number;
   height: number;
@@ -77,7 +85,7 @@ interface HoleInfo {
 }
 
 interface StoneInfo {
-  hole: HTMLDivElement;
+  hole: HTMLDivElement | null;
   position: Position;
   row: number;
   col: number;
@@ -86,14 +94,16 @@ interface StoneInfo {
   isInStore: boolean;
 }
 
+let controlBoard = new ControlBoard();
+controlBoard.currentPlayer = controlBoard.players[1];
+
 const Board = ({ className }: BoardProps) => {
   const [isRotated, setIsRotated] = useState(false);
   const [stones, setStones] = useState<StoneInfo[]>(new Array(Constants.BOARD_COLS * Constants.STONES_PER_HOLE));
   const [holes, setHoles] = useState<HoleInfo[][]>([new Array(Constants.BOARD_COLS), new Array(Constants.BOARD_COLS)]);
   const [imageSize, setImageSize] = useState<Size>({ height: 0, width: 0 });
   const [isLoading, setIsLoading] = useState(true);
-  const [leftStoreStones, setLeftStoreStones] = useState(0);
-  const [rightStoreStones, setRightStoreStones] = useState(0);
+  const [scores, setScores] = useState([0, 0]);
   const [isAnimationRunning, setIsAnimationRunning] = useState(false);
 
   // reference to the board image
@@ -105,6 +115,20 @@ const Board = ({ className }: BoardProps) => {
   useEffect(() => {
     resetHoles();
   }, []);
+
+  useEffect(() => {
+    if (!isAnimationRunning) {
+      if (controlBoard.currentPlayer === controlBoard.players[0]) {
+        // wait one second to make AI move
+        setTimeout(() => {
+          bestMove(controlBoard).then((move) => {
+            console.log("ai played hole " + move);
+            makeMove(0, move);
+          });
+        }, 500);
+      }
+    }
+  }, [isAnimationRunning]);
 
   useEffect(() => {
     repositionStones();
@@ -177,39 +201,58 @@ const Board = ({ className }: BoardProps) => {
       let currentHole = e.target as HTMLDivElement;
       let holeIdx = getHoleIndexes(currentHole);
 
-      // check if user clicked on the oponent holes
-      if (holeIdx.row == 0) {
-        console.log(holeIdx);
-        console.log("Can't play with the opponent holes");
+      if (holeIdx.row === 0) {
+        console.log("Can't play with opponent holes.");
         return;
       }
 
-      // check if the animation is still running
-      if (isAnimationRunning) {
-        console.log("You must wait the animation finishes.");
+      if (!controlBoard.isMoveValid(controlBoard.players[0], holeIdx.col)) {
+        console.log("Move is not valid.");
         return;
       }
 
-      let newStones = [...stones];
-      let newHoles = [...holes];
+      makeMove(holeIdx.row, holeIdx.col);
+    },
+    [stones]
+  );
+
+  /**
+   *
+   * @param playerIndex
+   * @param holeIndex
+   */
+  function makeMove(playerIndex: number, holeIndex: number) {
+    controlBoard.makeMove(holeIndex);
+
+    let animationTime = holes[playerIndex][holeIndex].stones * Constants.ANIMATION_DELAY + 1000;
+
+    // Wait for the distribution to finish before counting scores
+    distributeStones(holesRef.current[playerIndex][holeIndex]).then((currentHole: HTMLDivElement) => {
+      countScores(currentHole, playerIndex);
+    });
+  }
+
+  /**
+   * Distribute the stones to other holes. This will start the animation.
+   *
+   * @param currentHole
+   * @returns
+   */
+  function distributeStones(currentHole: HTMLDivElement): Promise<HTMLDivElement> {
+    return new Promise((resolve) => {
+      let holeIdx = getHoleIndexes(currentHole);
+      let newStones = _.cloneDeep(stones);
+      let newHoles = _.cloneDeep(holes);
       let stonesInHole = newStones.filter((stone) => stone.hole === currentHole);
 
-      // check if there is no stones in the hole
-      if (stonesInHole.length == 0) {
-        console.log("Can't play with empty holes");
-        return;
-      }
-
       newHoles[holeIdx.row][holeIdx.col].stones = 0;
-
-      let animationDelay = Constants.ANIMATION_DELAY;
 
       stonesInHole.forEach((stone, i) => {
         holeIdx = getHoleIndexes(currentHole);
         let row = holeIdx.row;
         let col = holeIdx.col;
 
-        if (row == 0) {
+        if (row === 0) {
           if (col > 0) {
             col--;
           } else {
@@ -222,19 +265,95 @@ const Board = ({ className }: BoardProps) => {
             row = 0;
           }
         }
-        currentHole = holesRef.current[row][col];
 
+        currentHole = holesRef.current[row][col];
         newHoles[row][col].stones++;
         stone.hole = currentHole;
-        stone.animationDelay = animationDelay * (i + 1);
-        if (leftStoreRef.current)
-          //stone.position = getRandomPositionInStore(leftStoreRef.current.getBoundingClientRect());
-          stone.position = getRandomPositionInHole(currentHole.getBoundingClientRect());
+        stone.animationDelay = Constants.ANIMATION_DELAY * (i + 1);
+
+        stone.position = getRandomPositionInHole(currentHole.getBoundingClientRect());
       });
 
+      setIsAnimationRunning(true);
       setStones(newStones);
+      setHoles(newHoles);
+
+      // wait the animation to finish
+      setTimeout(() => {
+        resolve(currentHole);
+      }, Constants.ANIMATION_DELAY * stonesInHole.length + Constants.ANIMATION_DURATION);
+    });
+  }
+
+  const countScores = useCallback(
+    (currentHole: HTMLDivElement, playerIndex: number) => {
+      let curreHoleIndexes = getHoleIndexes(currentHole);
+      let row = curreHoleIndexes.row;
+      let col = curreHoleIndexes.col;
+      let currentHoleInfo = holes[row][col];
+
+      let newStones = _.cloneDeep(stones);
+      let newHoles = _.cloneDeep(holes);
+      let newScores = _.cloneDeep(scores);
+
+      // count the scoresw
+      while ((currentHoleInfo.stones === 2 || currentHoleInfo.stones === 3) && currentHoleInfo.row !== playerIndex) {
+        // increase the user's score
+        newScores[playerIndex] += currentHoleInfo.stones;
+
+        let stonesInHole = newStones.filter((stone) => !stone.isInStore && stone.hole === currentHole);
+
+        stonesInHole.forEach((stone, i) => {
+          if (playerIndex == 0) {
+            if (leftStoreRef.current) {
+              stone.position = getRandomPositionInStore(leftStoreRef.current.getBoundingClientRect());
+            }
+          } else {
+            if (rightStoreRef.current) {
+              stone.position = getRandomPositionInStore(rightStoreRef.current.getBoundingClientRect());
+            }
+          }
+          stone.hole = null;
+          stone.isInStore = true;
+          stone.animationDelay = Constants.ANIMATION_DELAY * (i + 1);
+        });
+
+        setStones(newStones);
+
+        newHoles[row][col].stones = 0;
+
+        // move clockwise to check if other holes also score
+        if (row === 0) {
+          if (col < 5) {
+            col++;
+          } else {
+            row = 1;
+          }
+        } else {
+          if (col > 0) {
+            col--;
+          } else {
+            row = 0;
+          }
+        }
+
+        currentHole = holesRef.current[row][col];
+        currentHoleInfo = holes[row][col];
+
+        //setHoles(newHoles);
+      }
+
+      setScores(newScores);
+      setHoles(newHoles);
+
+      /* // wait the animation to finish
+    setTimeout(() => {
+      setIsAnimationRunning(false);
+    }, animationTime); */
+
+      controlBoard.print();
     },
-    [stones]
+    [holes, scores]
   );
 
   /**
@@ -250,8 +369,7 @@ const Board = ({ className }: BoardProps) => {
     }
 
     setHoles(newHoles);
-    setLeftStoreStones(0);
-    setRightStoreStones(0);
+    setScores([0, 0]);
   }
 
   /**
@@ -289,8 +407,13 @@ const Board = ({ className }: BoardProps) => {
     let topMin = storeRect.top + storeRect.height * 0.2;
     let topMax = storeRect.top + storeRect.height - storeRect.height * 0.2;
 
-    let leftMin = storeRect.left;
-    let leftMax = storeRect.left + storeRect.width;
+    // estimated stone size (would be good to have the stone reference to get this info)
+    // stone size is increased a bit to avoid touching edges
+    let stoneSize = window.innerWidth * Constants.STONE_SIZE * 1.1;
+
+    // increase a bit to avoid touching the edges
+    let leftMin = storeRect.left * 1.1;
+    let leftMax = storeRect.left + storeRect.width - stoneSize;
 
     return { left: Math.random() * (leftMax - leftMin) + leftMin, top: Math.random() * (topMax - topMin) + topMin };
   }
@@ -300,7 +423,7 @@ const Board = ({ className }: BoardProps) => {
    * @param hole
    * @returns
    */
-  function getHoleIndexes(hole: HTMLDivElement) {
+  function getHoleIndexes(hole: HTMLDivElement): Index {
     let row = parseInt(hole.dataset.row as string);
     let col = parseInt(hole.dataset.col as string);
 
@@ -321,14 +444,10 @@ const Board = ({ className }: BoardProps) => {
     holesRef.current.forEach((row_array, row) => {
       row_array.forEach((holeElement, col) => {
         for (let i = 0; i < holes[row][col].stones; i++) {
-          let color = Object.values(StoneColors)[i % STONES_PER_HOLE];
+          let color = Object.values(StoneColors)[i % Constants.STONES_PER_HOLE];
           let rect = holeElement.getBoundingClientRect();
           let randomPos = getRandomPositionInHole(rect);
           let position = { top: randomPos.top, left: randomPos.left };
-
-          if (isRotated) {
-            //position = { left: randomPos.top, top: randomPos.left };
-          }
 
           newStones.push({
             hole: holeElement,
@@ -355,7 +474,7 @@ const Board = ({ className }: BoardProps) => {
     return (
       <HolesSection className={"holes-section"}>
         {holes.map((row_val, row) => (
-          <PlayerHoles className={row == 0 ? "player-0" : "player-1"} key={`player-hole-${row}`}>
+          <PlayerHoles className={row === 0 ? "player-0" : "player-1"} key={`player-hole-${row}`}>
             {row_val.map((hole, col) => {
               return (
                 <Hole
@@ -363,9 +482,9 @@ const Board = ({ className }: BoardProps) => {
                   row={row}
                   col={col}
                   key={`hole-${row}-${col}`}
-                  counterOnTop={row == 1}
+                  counterOnTop={row === 1}
                   stones={hole.stones}
-                  isClickable={row == 1}
+                  isClickable={row === 1}
                   onClick={onClickHole}
                 />
               );
@@ -390,8 +509,8 @@ const Board = ({ className }: BoardProps) => {
           color={stone.color}
           animationDelay={stone.animationDelay}
           position={stone.position}
-          isClickable={stone.hole.dataset.row == "1"}
-          onClick={() => stone.hole.click()}
+          isClickable={stone.hole?.dataset.row === "1"}
+          onClick={() => stone.hole?.click()}
         />
       );
     });
@@ -416,9 +535,9 @@ const Board = ({ className }: BoardProps) => {
         />
 
         <PlayableArea className={"playable-area"}>
-          <Store isTop={true} stones={leftStoreStones} ref={leftStoreRef} className={"player0-store-section"} />
+          <Store isTop={true} stones={scores[0]} ref={leftStoreRef} className={"player0-store-section"} />
           {renderHoles()}
-          <Store isTop={false} stones={rightStoreStones} ref={rightStoreRef} className={"player1-store-section"} />
+          <Store isTop={false} stones={scores[1]} ref={rightStoreRef} className={"player1-store-section"} />
         </PlayableArea>
       </Container>
       <div className={"stones-wrapper"}>{renderStones()}</div>

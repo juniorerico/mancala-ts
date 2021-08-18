@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useWindowResize } from "beautiful-react-hooks";
 import Board from "./Board";

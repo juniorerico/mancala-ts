@@ -28,7 +28,7 @@ export class Board {
   scores: number[];
 
   constructor() {
-    this.players = [{ name: "p1" }, { name: "p2" }];
+    this.players = [{ name: "COMPUTER" }, { name: "HUMAN" }];
     this.holes = [[], []];
     this.scores = [0, 0];
     this.currentPlayer = this.players[0];
@@ -62,7 +62,11 @@ export class Board {
    */
   makeMove(holeIndex: number) {
     if (!this.isMoveValid(this.currentPlayer, holeIndex)) {
-      throw new Error("Can't make a move. Move not valid for the current player.");
+      throw new Error(
+        `Can't make a move. Move '${holeIndex}' is not valid for the current player (${
+          this.currentPlayer.name
+        }). Available moves: ${this.getPossibleMoves(this.currentPlayer)}`
+      );
     }
 
     let playerIndex = this.players.indexOf(this.currentPlayer);
@@ -71,13 +75,13 @@ export class Board {
     currentHole = this.distributeStones(currentHole);
 
     // count the scores
-    while ((currentHole.stones == 2 || currentHole.stones == 3) && currentHole.row != playerIndex) {
+    while ((currentHole.stones === 2 || currentHole.stones === 3) && currentHole.row !== playerIndex) {
       // increase the user's score
       this.scores[playerIndex] += currentHole.stones;
       currentHole.stones = 0;
 
       // move clockwise to check if other holes also score
-      if (currentHole.row == 0) {
+      if (currentHole.row === 0) {
         if (currentHole.col < 5) {
           currentHole = this.holes[currentHole.row][currentHole.col + 1];
         } else {
@@ -93,7 +97,7 @@ export class Board {
     }
 
     // switch the current player
-    this.currentPlayer = playerIndex == 0 ? this.players[1] : this.players[0];
+    this.currentPlayer = playerIndex === 0 ? this.players[1] : this.players[0];
   }
 
   /**
@@ -109,7 +113,7 @@ export class Board {
 
     // move clockwise dropping stone in each hole
     for (let i = 0; i < stones; i++) {
-      if (currentHole.row == 0) {
+      if (currentHole.row === 0) {
         if (currentHole.col > 0) {
           currentHole = this.holes[currentHole.row][currentHole.col - 1];
         } else {
@@ -144,7 +148,7 @@ export class Board {
    * Check if the game is over
    */
   isGameOver(): boolean {
-    if (this.scores[0] >= 24 || this.scores[1] >= 24 || this.getPossibleMoves(this.currentPlayer).length == 0) {
+    if (this.scores[0] >= 24 || this.scores[1] >= 24 || this.getPossibleMoves(this.currentPlayer).length === 0) {
       return true;
     } else {
       return false;
@@ -159,7 +163,7 @@ export class Board {
   getPossibleMoves(player: Player) {
     let playerIndex = this.players.indexOf(player);
 
-    if (playerIndex == -1) {
+    if (playerIndex === -1) {
       throw new Error("Can't get possible moves. Player not found.'");
     }
 
@@ -169,7 +173,7 @@ export class Board {
 
     playerHoles.forEach((hole, holeIndex) => {
       if (hole.stones > 0) {
-        if (hole.stones > 1 || (hole.stones == 1 && holesWithMoreThanOneStone == 0)) possibleIndexes.push(holeIndex);
+        if (hole.stones > 1 || (hole.stones === 1 && holesWithMoreThanOneStone === 0)) possibleIndexes.push(holeIndex);
       }
     });
 
