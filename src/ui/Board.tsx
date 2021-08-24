@@ -374,12 +374,12 @@ const Board = ({ className }: BoardProps) => {
   function onPlay(level: number) {
     dispatch({ type: ActionType.Game_SetBotLevel, payload: { level } });
 
-    let firstPlayer = Math.floor(Math.random() * 2) + 0;
-    if (firstPlayer == 0) {
-      console.log("COMPUTER PLAYS FIRST!");
-      controlBoard.currentPlayer = controlBoard.players[0];
-      dispatch({ type: ActionType.Game_NextPlayer });
-    }
+    /* let firstPlayer = Math.floor(Math.random() * 2) + 0;
+    if (firstPlayer == 0) { */
+    console.log("COMPUTER PLAYS FIRST!");
+    controlBoard.currentPlayer = controlBoard.players[0];
+    dispatch({ type: ActionType.Game_NextPlayer });
+    //}
 
     setShowDialog(false);
   }
