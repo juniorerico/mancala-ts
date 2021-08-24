@@ -12,9 +12,9 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 ReactDOM.render(
-  <React.StrictMode>
+  <>
     <GlobalStyle />
     <Game />
-  </React.StrictMode>,
+  </>,
   document.getElementById("root")
 );

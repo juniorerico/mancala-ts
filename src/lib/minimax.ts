@@ -8,22 +8,37 @@ var _ = require("lodash");
  * @param maxDepth max depth the algoritgm is going to search
  * @returns the best move
  */
-export function bestMove(board: Board, maxDepth: number = 6): number {
-  let bestScore = -Infinity;
-  let move = board.getPossibleMoves(board.currentPlayer)[0];
-  let possibleMoves = board.getPossibleMoves(board.currentPlayer);
+export function bestMove(board: Board, maxDepth: number = 6): Promise<number> {
+  return new Promise((resolve) => {
+    let playerIndex = board.players.findIndex((p) => p === board.currentPlayer);
+    let bestScore = playerIndex === 0 ? -Infinity : Infinity;
+    let move = board.getPossibleMoves(board.currentPlayer)[0];
+    let possibleMoves = board.getPossibleMoves(board.currentPlayer);
 
-  shuffleArray(possibleMoves).forEach((m) => {
-    let newBoard: Board = _.cloneDeep(board);
-    newBoard.makeMove(m);
-    let score = minimax(newBoard, maxDepth, true, -Infinity, Infinity);
-    if (score > bestScore) {
-      bestScore = score;
-      move = m;
-    }
+    shuffleArray(possibleMoves).forEach((m) => {
+      let newBoard: Board = _.cloneDeep(board);
+      newBoard.makeMove(m);
+      let score = minimax(
+        newBoard,
+        maxDepth,
+        playerIndex === 0 ? true : false,
+        playerIndex === 0 ? -Infinity : Infinity
+      );
+      if (playerIndex === 0) {
+        if (score > bestScore) {
+          bestScore = score;
+          move = m;
+        }
+      } else {
+        if (score < bestScore) {
+          bestScore = score;
+          move = m;
+        }
+      }
+    });
+
+    resolve(move);
   });
-
-  return move;
 }
 
 /**
@@ -46,8 +61,20 @@ function shuffleArray(array: any[]) {
  * @param beta
  * @returns
  */
-function minimax(board: Board, depth: number, maximizingPlayer: boolean, alpha: number = -Infinity, beta: number = Infinity): number {
-  if (depth == 0 || board.isGameOver()) {
+function minimax(
+  board: Board,
+  depth: number,
+  maximizingPlayer: boolean,
+  alpha: number = -Infinity,
+  beta: number = Infinity
+): number {
+  if (board.isGameOver()) {
+    if (board.getWinner() === 0) {
+      return Infinity;
+    } else {
+      return -Infinity;
+    }
+  } else if (depth === 0) {
     return board.scores[0] - board.scores[1];
   }
 
