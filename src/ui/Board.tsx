@@ -98,6 +98,13 @@ const Board = ({ className }: BoardProps) => {
   }, [state]);
 
   useEffect(() => {
+    if (controlBoard.isGameOver()) {
+      dispatch({ type: ActionType.Game_Reset });
+      setShowDialog(true);
+    }
+  }, [state.currentPlayer]);
+
+  useEffect(() => {
     if (controlBoard.currentPlayer === controlBoard.players[0] && !controlBoard.isGameOver()) {
       console.log("bot level: " + stateRef.current.botLevel);
       bestMove(controlBoard, stateRef.current.botLevel).then((move) => {
@@ -114,7 +121,7 @@ const Board = ({ className }: BoardProps) => {
 
   useEffect(() => {
     if (!isLoading) {
-      setInitialState();
+      //setInitialState();
     }
   }, [isLoading]);
 
@@ -366,7 +373,7 @@ const Board = ({ className }: BoardProps) => {
    * Set the board initial state
    */
   function setInitialState() {
-    // dispatch({ type: ActionType.Game_Reset });
+    dispatch({ type: ActionType.Game_Reset });
     //resetHoles();
     //repositionStones();
   }
