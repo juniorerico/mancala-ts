@@ -155,6 +155,16 @@ export class Board {
     }
   }
 
+  getWinner(): number | null {
+    if (!this.isGameOver()) {
+      return null;
+    } else if (this.scores[0] > this.scores[1]) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }
+
   /**
    * Get possible moves for a given player
    * @param player

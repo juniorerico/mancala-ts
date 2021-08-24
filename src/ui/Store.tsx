@@ -41,8 +41,6 @@ interface StoreProps {
 }
 
 const Store = React.forwardRef<HTMLDivElement, StoreProps>((props, ref) => {
-  console.log("Rendering Store...");
-
   return (
     <Container style={{ alignItems: props.isTop ? "flex-start" : "flex-end" }} className={props.className}>
       <StoreHole

@@ -1,0 +1,172 @@
+@import "compass/css3";
+
+$track-min: 1;
+$track-max: 6;
+$track-n: $track-max - $track-min + 1;
+$track-k: 4;
+$track-u: 5em;
+$track-w: $track-n * $track-u;
+$track-h: 0.5em;
+$track-c: #da974e;
+
+$thumb-d: 2em;
+$thumb-bw: ($track-u - $thumb-d)/2;
+
+$cube-l: 0.875em;
+$cube-part-w: $cube-l * sqrt(3) / 2;
+$cube-part-h: $cube-l * 3/2;
+$cube-c: (
+  pre: #adce32 #8cd60d #7cc600,
+  post: #e8dddd #d1d0d4 #f1e7e7,
+);
+
+@function cubes($n, $k) {
+  $cubes-bg: ();
+
+  @for $i from 0 to $n {
+    $cc: if($i < $k, map-get($cube-c, pre), map-get($cube-c, post));
+
+    $cubes-bg: $cubes-bg,
+      linear-gradient(30deg, transparent 25%, nth($cc, 2) 25%, nth($cc, 2) 75%, transparent 75%)
+        ($i + 0.5) *
+        $track-u -
+        $cube-part-w
+        2.25 *
+        $thumb-d +
+        $cube-l/2,
+      linear-gradient(-30deg, transparent 25%, nth($cc, 3) 25%, nth($cc, 3) 75%, transparent 75%)
+        ($i + 0.5) *
+        $track-u
+        2.25 *
+        $thumb-d +
+        $cube-l/2,
+      linear-gradient(30deg, transparent 25%, nth($cc, 1) 25%, nth($cc, 1) 75%, transparent 75%)
+        ($i + 0.5) *
+        $track-u
+        2.25 *
+        $thumb-d,
+      linear-gradient(-30deg, transparent 25%, nth($cc, 1) 25%, nth($cc, 1) 75%, transparent 75%)
+        ($i + 0.5) *
+        $track-u -
+        $cube-part-w
+        2.25 *
+        $thumb-d;
+  }
+
+  @return $cubes-bg;
+}
+
+@mixin track() {
+  box-sizing: border-box;
+  border: solid 1px $track-c;
+  width: $track-w;
+  height: $track-h;
+  border-radius: $track-h/2;
+  background: linear-gradient(90deg, $track-c 0.125em, transparent 0.125em) -1px 0 border-box #f5f8eb;
+  background-size: $track-u 100%;
+}
+
+@mixin thumb($ie: false) {
+  $stop: if($ie, 52%, calc(50% + 1px));
+
+  box-sizing: border-box;
+  border: solid $thumb-bw transparent;
+  width: $track-u;
+  height: $track-u;
+  border-radius: $thumb-bw + 0.375em;
+  transform: translateY(-$track-h/2) rotate(30deg) skewY(30deg) scaleX(cos(30deg));
+  box-shadow: inset -1px -1px #3a3534;
+  background: linear-gradient(-45deg, #3a3534 20%, #60858a 50%, #3a3534 50%, #3a3534 $stop, transparent $stop) no-repeat
+    content-box;
+  filter: drop-shadow(0 0 #3a3534);
+}
+
+input[type="range"] {
+  &,
+  &::-webkit-slider-runnable-track,
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+  }
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: solid 0 transparent;
+  border-width: 0 $thumb-d;
+  padding: 0 0 4 * $cube-l;
+  width: $track-w;
+  height: 2 * $thumb-d;
+  border-radius: 3px;
+  transform: translate(-50%, -50%);
+  opacity: 0.7;
+  background: cubes($track-n, 0);
+  background-repeat: no-repeat;
+  background-size: $cube-part-w + 0.0625em $cube-part-h;
+  filter: drop-shadow(0 0 0.125em #5f3900);
+  font-size: 1em;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    @include track();
+  }
+  &::-moz-range-track {
+    @include track();
+  }
+  &::-ms-track {
+    @include track();
+    color: transparent;
+  }
+
+  &::-webkit-slider-thumb {
+    position: relative;
+    margin-top: ($track-h - $track-u)/2;
+    @include thumb();
+  }
+  &::-moz-range-thumb {
+    @include thumb();
+  }
+  &::-ms-thumb {
+    @include thumb(true);
+  }
+
+  &::-ms-fill-lower,
+  &::-ms-tooltip {
+    display: none;
+  }
+
+  &::-webkit-slider-thumb,
+  /deep/ #thumb {
+    &:before {
+      position: absolute;
+      width: $thumb-d;
+      height: $thumb-d;
+      transform: scaleX(1 / cos(30deg)) skewY(-30deg) rotate(-30deg) translateY(37%);
+      background: linear-gradient(white, white) no-repeat 50% 20%,
+        radial-gradient(
+            circle,
+            transparent $thumb-d/8,
+            white $thumb-d/8,
+            white $thumb-d/8 + 0.125em,
+            transparent $thumb-d/8 + 0.125em
+          )
+          no-repeat;
+      background-size: 0.125em 25%, 100% 86%;
+      filter: blur(1px);
+      content: "";
+    }
+  }
+
+  @for $ck from $track-min through $track-max {
+    .js &[value="#{$ck}"] {
+      background: cubes($track-n, $ck);
+      background-repeat: no-repeat;
+      /* Chrome needs the 1px correction */
+      background-size: $cube-part-w + 0.0625em $cube-part-h;
+    }
+  }
+
+  &:focus {
+    outline: none;
+    opacity: 0.99;
+  }
+}
