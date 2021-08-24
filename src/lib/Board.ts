@@ -39,7 +39,7 @@ export class Board {
   /**
    * Reset the board to the initial state
    */
-  private resetBoard() {
+  resetBoard() {
     this.scores = [0, 0];
     this.holes = [[], []];
 
@@ -52,6 +52,8 @@ export class Board {
         };
       }
     }
+
+    this.currentPlayer = this.players[0];
   }
 
   /**

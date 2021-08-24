@@ -100,6 +100,7 @@ const Board = ({ className }: BoardProps) => {
   useEffect(() => {
     if (controlBoard.isGameOver()) {
       dispatch({ type: ActionType.Game_Reset });
+      controlBoard.resetBoard();
       setShowDialog(true);
     }
   }, [state.currentPlayer]);
