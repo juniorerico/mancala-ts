@@ -8,8 +8,7 @@ export enum ActionType {
   Store_SetRef,
   Stone_Collect,
   Game_NextPlayer,
-  Game_SetBotLevel,
-  Game_SetState,
+  Game_Start,
   Game_Reset,
 }
 
@@ -41,19 +40,13 @@ export interface Stone_Collect {
 export interface Game_NextPlayer {
   type: ActionType.Game_NextPlayer;
 }
-
-export interface Game_SetBotLevel {
-  type: ActionType.Game_SetBotLevel;
-  payload: { level: number };
-}
-
 export interface Game_Reset {
   type: ActionType.Game_Reset;
 }
 
-export interface Game_SetState {
-  type: ActionType.Game_SetState;
-  payload: { state: States };
+export interface Game_Start {
+  type: ActionType.Game_Start;
+  payload: { currentPlayer: 0 | 1; botLevel: number };
 }
 
 export type GameActions =
@@ -63,6 +56,5 @@ export type GameActions =
   | Store_SetRef
   | Stone_Collect
   | Game_NextPlayer
-  | Game_SetBotLevel
   | Game_Reset
-  | Game_SetState;
+  | Game_Start;

@@ -7,6 +7,12 @@ const Container = styled.div`
   height: 100%;
   background-image: url(assets/background.png);
   overflow: hidden;
+
+  @media (orientation: landscape) {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
 `;
 
 function Game() {

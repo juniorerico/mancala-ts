@@ -41,13 +41,9 @@ interface StoneProps {
 }
 
 const Stone = React.forwardRef<HTMLDivElement, StoneProps>((props, ref) => {
-  console.log("render stone...");
+  //console.log("render stone...");
   const { state } = useContext(GameContext);
   const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
-
-  useEffect(() => {
-    console.log(state);
-  }, [state]);
 
   useEffect(() => {
     function update() {

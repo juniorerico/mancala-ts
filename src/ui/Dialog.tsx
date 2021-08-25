@@ -220,8 +220,7 @@ const Store = (props: DialogProps) => {
                   >
                     <option value="1">Easy Bot</option>
                     <option value="3">Medium Bot</option>
-                    <option value="4">Hard Bot</option>
-                    <option value="6">Insane Bot</option>
+                    <option value="6">Hard Bot</option>
                   </Dropdown>
                 </SelectWrapper>
               </Control>

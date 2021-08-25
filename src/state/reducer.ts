@@ -1,6 +1,6 @@
 import { GameState, initialState } from "./state";
 import { ActionType, GameActions } from "./actions";
-import { Constants } from "../common/Constants";
+import { Constants, States } from "../common/Constants";
 
 export function gameReducer(state: GameState, action: GameActions): GameState {
   switch (action.type) {
@@ -89,11 +89,6 @@ export function gameReducer(state: GameState, action: GameActions): GameState {
         ...state,
         currentPlayer: state.currentPlayer === 0 ? 1 : 0,
       };
-    case ActionType.Game_SetBotLevel:
-      return {
-        ...state,
-        botLevel: action.payload.level,
-      };
     case ActionType.Game_Reset:
       return {
         ...initialState,
@@ -106,10 +101,12 @@ export function gameReducer(state: GameState, action: GameActions): GameState {
           });
         }),
       };
-    case ActionType.Game_SetState:
+    case ActionType.Game_Start:
       return {
-        ...initialState,
-        gameState: action.payload.state,
+        ...state,
+        currentPlayer: action.payload.currentPlayer,
+        gameState: States.WAITING_FOR_PLAY,
+        botLevel: action.payload.botLevel ? action.payload.botLevel : state.botLevel,
       };
     default:
       return state;
