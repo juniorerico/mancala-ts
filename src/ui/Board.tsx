@@ -64,9 +64,10 @@ const PlayerHoles = styled.div`
 
 interface BoardProps {
   className?: string;
+  onError?: (message: string) => void;
 }
 
-const Board = ({ className }: BoardProps) => {
+const Board = ({ className, onError }: BoardProps) => {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const [showDialog, setShowDialog] = useState(true);
   const [isRotated, setIsRotated] = useState(false);
@@ -192,27 +193,27 @@ const Board = ({ className }: BoardProps) => {
       let holeIdx = getHoleIndexes(currentHole);
 
       if (ControlBoard.isGameOver()) {
-        console.log("The game is already over!");
-        return;
-      }
-
-      if (isAnimationRunning) {
-        console.log("Wait until the animation is finished.");
+        displayError("The game is already over!");
         return;
       }
 
       if (state.currentPlayer == 0) {
-        console.log("It is not your time to play yet.");
+        displayError("It is not your turn yet.");
+        return;
+      }
+
+      if (isAnimationRunning) {
+        displayError("Wait until the animation is finished.");
         return;
       }
 
       if (holeIdx.row === 0) {
-        console.log("Can't play with opponent holes.");
+        displayError("Can't play with opponent holes.");
         return;
       }
 
       if (!ControlBoard.isMoveValid(ControlBoard.players[0], holeIdx.col)) {
-        console.log("Move is not valid.");
+        displayError("Move is not valid!");
         return;
       }
 
@@ -220,6 +221,10 @@ const Board = ({ className }: BoardProps) => {
     },
     [state.currentPlayer, isAnimationRunning]
   );
+
+  function displayError(message: string) {
+    if (onError) onError(message);
+  }
 
   /**
    *

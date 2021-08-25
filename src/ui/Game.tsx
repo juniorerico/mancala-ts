@@ -1,6 +1,9 @@
 import styled from "styled-components";
 import { useWindowResize } from "beautiful-react-hooks";
 import Board from "./Board";
+import { Snackbar } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import { useState } from "react";
 
 const Container = styled.div`
   width: 100%;
@@ -16,6 +19,9 @@ const Container = styled.div`
 `;
 
 function Game() {
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
   useWindowResize(() => {
     update();
   });
@@ -29,7 +35,25 @@ function Game() {
 
   return (
     <Container>
-      <Board className="board" />
+      <Board
+        className="board"
+        onError={(message) => {
+          setShowAlert(true);
+          setAlertMessage(message);
+        }}
+      />
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={showAlert}
+        autoHideDuration={2000}
+        onClose={() => {
+          setShowAlert(false);
+        }}
+      >
+        <Alert onClose={() => setShowAlert(false)} severity="info">
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
