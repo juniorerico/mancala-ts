@@ -1,3 +1,4 @@
+import { States } from "../common/Constants";
 import { Index } from "./state";
 
 export enum ActionType {
@@ -8,6 +9,7 @@ export enum ActionType {
   Stone_Collect,
   Game_NextPlayer,
   Game_SetBotLevel,
+  Game_SetState,
   Game_Reset,
 }
 
@@ -49,6 +51,11 @@ export interface Game_Reset {
   type: ActionType.Game_Reset;
 }
 
+export interface Game_SetState {
+  type: ActionType.Game_SetState;
+  payload: { state: States };
+}
+
 export type GameActions =
   | Hole_PutStones
   | Hole_CollectStones
@@ -57,4 +64,5 @@ export type GameActions =
   | Stone_Collect
   | Game_NextPlayer
   | Game_SetBotLevel
-  | Game_Reset;
+  | Game_Reset
+  | Game_SetState;

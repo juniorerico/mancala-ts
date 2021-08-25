@@ -14,3 +14,9 @@ export enum StoneColors {
   BLUE = "#738ab0",
   YELLOW = "#ffbe40",
 }
+
+export enum States {
+  LOADING,
+  PAUSED,
+  WAITING_FOR_PLAY,
+}

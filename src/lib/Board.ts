@@ -52,8 +52,6 @@ export class Board {
         };
       }
     }
-
-    this.currentPlayer = this.players[0];
   }
 
   /**

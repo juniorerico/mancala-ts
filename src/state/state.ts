@@ -1,4 +1,4 @@
-import { Constants, StoneColors } from "../common/Constants";
+import { Constants, States, StoneColors } from "../common/Constants";
 
 export interface Index {
   row: number;
@@ -42,10 +42,12 @@ export interface GameState {
   stones: StoneInfo[];
   stores: Store[];
   currentPlayer: 0 | 1;
+  gameState: States;
 }
 
 export const initialState: GameState = {
   botLevel: 1,
+  gameState: States.LOADING,
   holes: [[], []].map((_, i) =>
     Array.from(new Array(Constants.BOARD_COLS)).map((_, j) => {
       return { row: i, col: j, stones: Constants.STONES_PER_HOLE, ref: null };

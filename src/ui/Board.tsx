@@ -6,7 +6,7 @@ import Stone from "./Stone";
 import Store from "./Store";
 import { Board as ControlBoard } from "../lib/Board";
 import { bestMove } from "../lib/minimax";
-import { Constants } from "../common/Constants";
+import { Constants, States } from "../common/Constants";
 import { gameReducer } from "../state/reducer";
 import { GameState, Index, initialState, Position, Size } from "../state/state";
 import { ActionType } from "../state/actions";
@@ -94,13 +94,15 @@ const Board = ({ className }: BoardProps) => {
 
   useEffect(() => {
     stateRef.current = state;
-    //console.log(state);
+    console.log(state);
   }, [state]);
 
   useEffect(() => {
     if (controlBoard.isGameOver()) {
       dispatch({ type: ActionType.Game_Reset });
+      controlBoard.currentPlayer = controlBoard.players[1];
       controlBoard.resetBoard();
+      // dispatch({ type: ActionType.Game_SetState, payload: { state: States.PAUSED } });
       setShowDialog(true);
     }
   }, [state.currentPlayer]);
@@ -118,13 +120,7 @@ const Board = ({ className }: BoardProps) => {
         makeMove(1, move);
       }); */
     }
-  }, [state.currentPlayer, state.botLevel]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      //setInitialState();
-    }
-  }, [isLoading]);
+  }, [state.currentPlayer, state.botLevel, state.gameState]);
 
   /**
    * Handle window resize
@@ -168,6 +164,7 @@ const Board = ({ className }: BoardProps) => {
     console.log("image loaded!");
     resize();
     setIsLoading(false);
+    //dispatch({ type: ActionType.Game_SetState, payload: { state: States.PAUSED } });
   }, []);
 
   /**
@@ -370,15 +367,6 @@ const Board = ({ className }: BoardProps) => {
     return { row, col };
   }
 
-  /**
-   * Set the board initial state
-   */
-  function setInitialState() {
-    dispatch({ type: ActionType.Game_Reset });
-    //resetHoles();
-    //repositionStones();
-  }
-
   function onPlay(level: number) {
     dispatch({ type: ActionType.Game_SetBotLevel, payload: { level } });
 
@@ -389,6 +377,7 @@ const Board = ({ className }: BoardProps) => {
     dispatch({ type: ActionType.Game_NextPlayer });
     //}
 
+    //dispatch({ type: ActionType.Game_SetState, payload: { state: States.WAITING_FOR_PLAY } });
     setShowDialog(false);
   }
 

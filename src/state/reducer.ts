@@ -106,6 +106,11 @@ export function gameReducer(state: GameState, action: GameActions): GameState {
           });
         }),
       };
+    case ActionType.Game_SetState:
+      return {
+        ...initialState,
+        gameState: action.payload.state,
+      };
     default:
       return state;
   }

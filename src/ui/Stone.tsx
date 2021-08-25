@@ -46,8 +46,8 @@ const Stone = React.forwardRef<HTMLDivElement, StoneProps>((props, ref) => {
   const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
 
   useEffect(() => {
-    //console.log(state);
-  }, [state.holes]);
+    console.log(state);
+  }, [state]);
 
   useEffect(() => {
     function update() {
