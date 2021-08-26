@@ -44,11 +44,13 @@ export interface GameState {
   stores: Store[];
   currentPlayer: 0 | 1;
   gameState: States;
+  showNewGameDialog: boolean;
 }
 
 export const initialState: GameState = {
   botLevel: 1,
   gameState: States.PAUSED,
+  showNewGameDialog: true,
   holes: [[], []].map((_, i) =>
     Array.from(new Array(Constants.BOARD_COLS)).map((_, j) => {
       return { row: i, col: j, stones: Constants.STONES_PER_HOLE, ref: null };

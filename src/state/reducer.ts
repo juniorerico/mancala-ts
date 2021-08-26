@@ -1,4 +1,4 @@
-import { GameState, initialState } from "./state";
+import { GameState, initialState, ControlBoard } from "./state";
 import { ActionType, GameActions } from "./actions";
 import { Constants, States } from "../common/Constants";
 
@@ -90,6 +90,7 @@ export function gameReducer(state: GameState, action: GameActions): GameState {
         currentPlayer: state.currentPlayer === 0 ? 1 : 0,
       };
     case ActionType.Game_Reset:
+      ControlBoard.resetBoard();
       return {
         ...initialState,
         holes: state.holes.map((arr, i) => {
@@ -100,13 +101,21 @@ export function gameReducer(state: GameState, action: GameActions): GameState {
             };
           });
         }),
+        stores: state.stores.map((store) => {
+          return {
+            ...store,
+            score: 0,
+          };
+        }),
       };
     case ActionType.Game_Start:
+      ControlBoard.currentPlayer = ControlBoard.players[action.payload.currentPlayer];
       return {
         ...state,
         currentPlayer: action.payload.currentPlayer,
         gameState: States.WAITING_FOR_PLAY,
         botLevel: action.payload.botLevel ? action.payload.botLevel : state.botLevel,
+        showNewGameDialog: false,
       };
     default:
       return state;

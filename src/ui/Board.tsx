@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useReducer } from "react";
+import React, { useEffect, useRef, useState, useCallback, useContext } from "react";
 import styled from "styled-components";
 import { useWindowResize } from "beautiful-react-hooks";
 import Hole from "./Hole";
@@ -6,11 +6,9 @@ import Stone from "./Stone";
 import Store from "./Store";
 import { bestMove } from "../lib/minimax";
 import { Constants, States } from "../common/Constants";
-import { gameReducer } from "../state/reducer";
 import { GameState, Index, initialState, ControlBoard, Size } from "../state/state";
 import { ActionType } from "../state/actions";
 import { GameContext } from "../state/context";
-import Dialog from "./Dialog";
 
 // Styled components
 
@@ -68,8 +66,7 @@ interface BoardProps {
 }
 
 const Board = ({ className, onError }: BoardProps) => {
-  const [state, dispatch] = useReducer(gameReducer, initialState);
-  const [showDialog, setShowDialog] = useState(true);
+  const { state, dispatch } = useContext(GameContext);
   const [isRotated, setIsRotated] = useState(false);
   const [imageSize, setImageSize] = useState<Size>({ height: 0, width: 0 });
   const [isLoading, setIsLoading] = useState(true);
@@ -86,30 +83,25 @@ const Board = ({ className, onError }: BoardProps) => {
   useEffect(() => {
     if (ControlBoard.isGameOver()) {
       dispatch({ type: ActionType.Game_Reset });
-      ControlBoard.currentPlayer = ControlBoard.players[1];
-      ControlBoard.resetBoard();
-      setShowDialog(true);
     }
   }, [state.currentPlayer]);
 
   useEffect(() => {
-    if (
-      state.gameState == States.WAITING_FOR_PLAY &&
-      ControlBoard.currentPlayer === ControlBoard.players[0] &&
-      !ControlBoard.isGameOver()
-    ) {
-      console.log("bot level: " + state.botLevel);
-      bestMove(ControlBoard, state.botLevel).then((move) => {
-        console.log(`${ControlBoard.currentPlayer.name} played move: ` + move);
-        setTimeout(() => {
-          makeMove(0, move);
-        }, 1000);
-      });
-    } else {
-      /*  bestMove(controlBoard, 6).then((move) => {
-        console.log(`${controlBoard.currentPlayer.name} played move: ` + move);
-        makeMove(1, move);
-      }); */
+    if (state.gameState == States.WAITING_FOR_PLAY && !ControlBoard.isGameOver()) {
+      if (ControlBoard.currentPlayer === ControlBoard.players[0]) {
+        console.log("bot level: " + state.botLevel);
+        bestMove(ControlBoard, state.botLevel).then((move) => {
+          console.log(`${ControlBoard.currentPlayer.name} played move: ` + move);
+          setTimeout(() => {
+            makeMove(0, move);
+          }, 1000);
+        });
+      } else {
+        /* bestMove(ControlBoard, 1).then((move) => {
+          console.log(`${ControlBoard.currentPlayer.name} played move: ` + move);
+          makeMove(1, move);
+        }); */
+      }
     }
   }, [state.currentPlayer, state.botLevel, state.gameState]);
 
@@ -172,6 +164,8 @@ const Board = ({ className, onError }: BoardProps) => {
   const addStoreZeroRef = useCallback((element: HTMLDivElement) => {
     if (element) {
       dispatch({ type: ActionType.Store_SetRef, payload: { index: 0, ref: element } });
+    } else {
+      console.log("no ref for store 0");
     }
   }, []);
 
@@ -181,6 +175,8 @@ const Board = ({ className, onError }: BoardProps) => {
   const addStoreOneRef = useCallback((element: HTMLDivElement) => {
     if (element) {
       dispatch({ type: ActionType.Store_SetRef, payload: { index: 1, ref: element } });
+    } else {
+      console.log("no ref for store 1");
     }
   }, []);
 
@@ -208,11 +204,11 @@ const Board = ({ className, onError }: BoardProps) => {
       }
 
       if (holeIdx.row === 0) {
-        displayError("Can't play with opponent holes.");
+        displayError("Can't play with opponent pieces.");
         return;
       }
 
-      if (!ControlBoard.isMoveValid(ControlBoard.players[0], holeIdx.col)) {
+      if (!ControlBoard.isMoveValid(ControlBoard.players[stateRef.current.currentPlayer], holeIdx.col)) {
         displayError("Move is not valid!");
         return;
       }
@@ -237,7 +233,6 @@ const Board = ({ className, onError }: BoardProps) => {
         dispatch({ type: ActionType.Game_NextPlayer });
         ControlBoard.makeMove(holeIndex);
         setIsAnimationRunning(false);
-        ControlBoard.print();
       });
     });
   }
@@ -355,13 +350,6 @@ const Board = ({ className, onError }: BoardProps) => {
     return { row, col };
   }
 
-  function onPlay(level: number) {
-    ControlBoard.currentPlayer = ControlBoard.players[0];
-
-    dispatch({ type: ActionType.Game_Start, payload: { currentPlayer: 0, botLevel: level } });
-    setShowDialog(false);
-  }
-
   /**
    * Render the holes
    *
@@ -421,7 +409,7 @@ const Board = ({ className, onError }: BoardProps) => {
   }
 
   return (
-    <GameContext.Provider value={{ state, dispatch }}>
+    <>
       <Container
         className={isRotated ? "rotated " : "" + className}
         style={{
@@ -455,8 +443,7 @@ const Board = ({ className, onError }: BoardProps) => {
         </PlayableArea>
       </Container>
       {isLoading ? <></> : <div className={"stones-wrapper"}>{renderStones()}</div>}
-      <Dialog isActive={showDialog} title={"Play Mancala!"} onClick={onPlay}></Dialog>
-    </GameContext.Provider>
+    </>
   );
 };
 
