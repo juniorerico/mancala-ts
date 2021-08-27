@@ -36,7 +36,7 @@
     "test": "react-scripts test",
     "build": "react-scripts build",
     "console-game": "npm run build && node dist/src/console-game.js",
-    "start": "npm run build && serve -s -p $PORT build",
+    "start": "npm run build && serve -s -p $env:PORT build",
     "dev": "react-scripts start"
   },
   "eslintConfig": {
