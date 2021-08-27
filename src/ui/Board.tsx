@@ -394,7 +394,7 @@ const Board = ({ className, onError }: BoardProps) => {
    */
   function renderStones(): React.ReactNode {
     return state.stones.map((stone, i) => {
-      if (!isLoading && state.holes[stone.holeIndex.row][stone.holeIndex.col].ref !== null) {
+      if (!isLoading) {
         return (
           <Stone
             index={i}

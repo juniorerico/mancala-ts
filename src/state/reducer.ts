@@ -71,7 +71,7 @@ export function gameReducer(state: GameState, action: GameActions): GameState {
           if (stone.id === action.payload.stoneId) {
             return {
               ...stone,
-              //holeIndex: { row: -1, col: -1 },
+              holeIndex: { row: -1, col: -1 },
               animationDelay: action.payload.animationDelay,
               isInStore: true,
               store: state.currentPlayer,
