@@ -9,7 +9,7 @@ interface StyleProps {
   isClickable: boolean;
 }
 
-const Container = styled.div<StyleProps>`
+const Container = styled.div<ContainerProps>`
   position: absolute;
   border-radius: 100%;
   box-shadow: inset 0px -6px 1px #00000040;
@@ -21,6 +21,9 @@ const Container = styled.div<StyleProps>`
     left ${Constants.ANIMATION_DURATION}ms ease-out
       ${(props) => (props.animationDelay ? props.animationDelay : Constants.ANIMATION_DELAY)}ms;
   cursor: ${(props) => (props.isClickable ? "pointer" : "auto")};
+  background-color: ${(props) => props.color};
+  top: ${(props) => props.position.top}px;
+  left: ${(props) => props.position.left}px;
 
   @media (orientation: portrait) {
     width: 2.8vh;
@@ -28,13 +31,20 @@ const Container = styled.div<StyleProps>`
   }
 `;
 
+interface ContainerProps {
+  animationDelay: number;
+  color: string;
+  position: Position;
+  isClickable: boolean;
+}
+
 interface StoneProps {
   index: number;
   color: string;
   className?: string;
   holeIndex: Index;
   isClickable: boolean;
-  animationDelay?: number;
+  animationDelay: number;
   isInStore: boolean;
   store: -1 | 0 | 1;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
@@ -135,17 +145,18 @@ const Stone = (props: StoneProps) => {
     return { left: Math.random() * (leftMax - leftMin) + leftMin, top: Math.random() * (topMax - topMin) + topMin };
   }
 
+  const handleClick = useCallback(() => {
+    state.holes[props.holeIndex.row][props.holeIndex.col].ref?.click();
+  }, [props.holeIndex]);
+
   return (
     <Container
       className={props.className}
-      style={{
-        backgroundColor: props.color,
-        top: position.top,
-        left: position.left,
-      }}
       isClickable={props.isClickable}
       animationDelay={props.animationDelay}
-      onClick={props.onClick}
+      onClick={handleClick}
+      position={position}
+      color={props.color}
     />
   );
 };

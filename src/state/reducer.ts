@@ -1,4 +1,4 @@
-import { GameState, initialState, ControlBoard } from "./state";
+import { GameState, initialState, ControlBoard, Index } from "./state";
 import { ActionType, GameActions } from "./actions";
 import { Constants, States } from "../common/Constants";
 
@@ -71,7 +71,7 @@ export function gameReducer(state: GameState, action: GameActions): GameState {
           if (stone.id === action.payload.stoneId) {
             return {
               ...stone,
-              holeIndex: { row: -1, col: -1 },
+              //holeIndex: { row: -1, col: -1 },
               animationDelay: action.payload.animationDelay,
               isInStore: true,
               store: state.currentPlayer,
@@ -82,6 +82,45 @@ export function gameReducer(state: GameState, action: GameActions): GameState {
         stores: state.stores.map((store, i) => {
           if (i === state.currentPlayer) return { ...store, score: store.score + 1 };
           return store;
+        }),
+      };
+    case ActionType.Game_MakeMove:
+      let row = state.currentPlayer;
+      let col = action.payload.move;
+
+      let indexes: Index[] = [];
+
+      return {
+        ...state,
+        holes: state.holes.map((arr, i) => {
+          return arr.map((hole, j) => {
+            if (i === state.currentPlayer && j === action.payload.move) {
+              return {
+                ...hole,
+                stones: 0,
+              };
+            }
+            return {
+              ...hole,
+            };
+          });
+        }),
+        stones: state.stones.map((stone, i) => {
+          if (stone.holeIndex.row === state.currentPlayer && stone.holeIndex.col === action.payload.move) {
+            if (row === 0) {
+              if (col > 0) col--;
+              else row = 1;
+            } else {
+              if (col < 5) col++;
+              else row = 0;
+            }
+            return {
+              ...stone,
+              holeIndex: { row, col },
+              animationDelay: Constants.ANIMATION_DELAY * (i + 1),
+            };
+          }
+          return stone;
         }),
       };
     case ActionType.Game_NextPlayer:

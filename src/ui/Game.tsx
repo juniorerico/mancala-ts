@@ -37,7 +37,7 @@ const StyledMenu = withStyles({
   },
 })(Menu);
 
-const StyledMenuItem = withStyles((theme) => ({
+const StyledMenuItem = withStyles(() => ({
   root: {
     color: "white",
     "&:focus": {
@@ -49,6 +49,17 @@ const StyledMenuItem = withStyles((theme) => ({
   },
 }))(MenuItem);
 
+const MenuButton = withStyles(() => ({
+  root: {
+    color: "white",
+    position: "absolute",
+    top: 0,
+    right: 0,
+    margin: "1rem",
+    padding: 0,
+  },
+}))(IconButton);
+
 function Game() {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const [showAlert, setShowAlert] = useState(false);
@@ -59,9 +70,9 @@ function Game() {
     update();
   });
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -87,19 +98,9 @@ function Game() {
   return (
     <GameContext.Provider value={{ state, dispatch }}>
       <Container>
-        <IconButton
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            margin: "1rem",
-            padding: 0,
-            color: "white",
-          }}
-          onClick={handleClick}
-        >
+        <MenuButton onClick={handleClick}>
           <MenuIcon fontSize="large" />
-        </IconButton>
+        </MenuButton>
 
         <StyledMenu
           getContentAnchorEl={null}

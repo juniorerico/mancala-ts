@@ -8,6 +8,7 @@ export enum ActionType {
   Store_SetRef,
   Stone_Collect,
   Game_NextPlayer,
+  Game_MakeMove,
   Game_Start,
   Game_Reset,
 }
@@ -37,6 +38,11 @@ export interface Stone_Collect {
   payload: { stoneId: number; animationDelay: number };
 }
 
+export interface Game_MakeMove {
+  type: ActionType.Game_MakeMove;
+  payload: { move: number };
+}
+
 export interface Game_NextPlayer {
   type: ActionType.Game_NextPlayer;
 }
@@ -55,6 +61,7 @@ export type GameActions =
   | Hole_SetRef
   | Store_SetRef
   | Stone_Collect
+  | Game_MakeMove
   | Game_NextPlayer
   | Game_Reset
   | Game_Start;

@@ -209,7 +209,7 @@ const Board = ({ className, onError }: BoardProps) => {
         return;
       }
 
-      if (!ControlBoard.isMoveValid(ControlBoard.players[stateRef.current.currentPlayer], holeIdx.col)) {
+      if (!ControlBoard.isMoveValid(ControlBoard.players[state.currentPlayer], holeIdx.col)) {
         displayError("Move is not valid!");
         return;
       }
@@ -244,100 +244,106 @@ const Board = ({ className, onError }: BoardProps) => {
    * @param currentHole
    * @returns
    */
-  function distributeStones(holeIndex: Index): Promise<Index> {
-    setIsAnimationRunning(true);
+  const distributeStones = useCallback(
+    (holeIndex: Index): Promise<Index> => {
+      setIsAnimationRunning(true);
 
-    return new Promise((resolve) => {
-      let stonesInHole = stateRef.current.stones.filter(
-        (stone) => stone.holeIndex.row == holeIndex.row && stone.holeIndex.col == holeIndex.col
-      );
-
-      dispatch({ type: ActionType.Hole_CollectStones, payload: holeIndex });
-
-      let row = holeIndex.row;
-      let col = holeIndex.col;
-      stonesInHole.forEach((stone, i) => {
-        if (row === 0) {
-          if (col > 0) {
-            col--;
-          } else {
-            row = 1;
-          }
-        } else {
-          if (col < 5) {
-            col++;
-          } else {
-            row = 0;
-          }
-        }
-
-        dispatch({
-          type: ActionType.Hole_PutStone,
-          payload: {
-            stoneId: stone.id,
-            holeIndex: { row, col },
-            animationDelay: Constants.ANIMATION_DELAY * (i + 1),
-          },
-        });
-      });
-
-      // wait the animation to finish
-      setTimeout(() => {
-        resolve({ row, col });
-      }, Constants.ANIMATION_DELAY * stonesInHole.length + Constants.ANIMATION_DURATION);
-    });
-  }
-
-  function countScores(holeIndex: Index): Promise<void> {
-    return new Promise((resolve) => {
-      let row = holeIndex.row;
-      let col = holeIndex.col;
-      let currentHole = stateRef.current.holes[row][col];
-      let animationDelay = 0;
-      let currentPlayerIndex = ControlBoard.players.findIndex((p) => p === ControlBoard.currentPlayer);
-
-      // count the scoresw
-      while ((currentHole.stones === 2 || currentHole.stones === 3) && currentHole.row !== currentPlayerIndex) {
-        // increase the user's score
-
-        let stonesInHole = stateRef.current.stones.filter(
-          (stone) => !stone.isInStore && stone.holeIndex.row === row && stone.holeIndex.col === col
+      return new Promise((resolve) => {
+        let stonesInHole = state.stones.filter(
+          (stone) => stone.holeIndex.row == holeIndex.row && stone.holeIndex.col == holeIndex.col
         );
 
+        dispatch({ type: ActionType.Hole_CollectStones, payload: holeIndex });
+
+        let row = holeIndex.row;
+        let col = holeIndex.col;
         stonesInHole.forEach((stone, i) => {
+          if (row === 0) {
+            if (col > 0) {
+              col--;
+            } else {
+              row = 1;
+            }
+          } else {
+            if (col < 5) {
+              col++;
+            } else {
+              row = 0;
+            }
+          }
+
           dispatch({
-            type: ActionType.Stone_Collect,
-            payload: { stoneId: stone.id, animationDelay: Constants.ANIMATION_DELAY * (i + 1) },
+            type: ActionType.Hole_PutStone,
+            payload: {
+              stoneId: stone.id,
+              holeIndex: { row, col },
+              animationDelay: Constants.ANIMATION_DELAY * (i + 1),
+            },
           });
-          animationDelay += Constants.ANIMATION_DELAY * (i + 1);
         });
 
-        dispatch({ type: ActionType.Hole_CollectStones, payload: { row, col } });
+        // wait the animation to finish
+        setTimeout(() => {
+          resolve({ row, col });
+        }, Constants.ANIMATION_DELAY * stonesInHole.length + Constants.ANIMATION_DURATION);
+      });
+    },
+    [state.stones]
+  );
 
-        // move clockwise to check if other holes also score
-        if (row === 0) {
-          if (col < 5) {
-            col++;
+  const countScores = useCallback(
+    (holeIndex: Index): Promise<void> => {
+      return new Promise((resolve) => {
+        let row = holeIndex.row;
+        let col = holeIndex.col;
+        let currentHole = stateRef.current.holes[row][col];
+        let animationDelay = 0;
+        let currentPlayerIndex = ControlBoard.players.findIndex((p) => p === ControlBoard.currentPlayer);
+
+        // count the scoresw
+        while ((currentHole.stones === 2 || currentHole.stones === 3) && currentHole.row !== currentPlayerIndex) {
+          // increase the user's score
+
+          let stonesInHole = stateRef.current.stones.filter(
+            (stone) => !stone.isInStore && stone.holeIndex.row === row && stone.holeIndex.col === col
+          );
+
+          stonesInHole.forEach((stone, i) => {
+            dispatch({
+              type: ActionType.Stone_Collect,
+              payload: { stoneId: stone.id, animationDelay: Constants.ANIMATION_DELAY * (i + 1) },
+            });
+            animationDelay += Constants.ANIMATION_DELAY * (i + 1);
+          });
+
+          dispatch({ type: ActionType.Hole_CollectStones, payload: { row, col } });
+
+          // move clockwise to check if other holes also score
+          if (row === 0) {
+            if (col < 5) {
+              col++;
+            } else {
+              row = 1;
+            }
           } else {
-            row = 1;
+            if (col > 0) {
+              col--;
+            } else {
+              row = 0;
+            }
           }
-        } else {
-          if (col > 0) {
-            col--;
-          } else {
-            row = 0;
-          }
+
+          currentHole = stateRef.current.holes[row][col];
         }
 
-        currentHole = stateRef.current.holes[row][col];
-      }
-
-      // wait the animation to finish
-      setTimeout(() => {
-        resolve();
-      }, animationDelay);
-    });
-  }
+        // wait the animation to finish
+        setTimeout(() => {
+          resolve();
+        }, animationDelay);
+      });
+    },
+    [state.stones, state.holes]
+  );
 
   /**
    * Get the row and col from a HTML element dataset
@@ -359,7 +365,7 @@ const Board = ({ className, onError }: BoardProps) => {
   function renderHoles(): React.ReactNode {
     return (
       <HolesSection className={"holes-section"}>
-        {state.holes.map((row_val, row) => (
+        {stateRef.current.holes.map((row_val, row) => (
           <PlayerHoles className={row === 0 ? "player-0" : "player-1"} key={`player-hole-${row}`}>
             {row_val.map((hole, col) => {
               return (
@@ -399,11 +405,6 @@ const Board = ({ className, onError }: BoardProps) => {
             isClickable={stone.holeIndex.row === 1}
             isInStore={stone.isInStore}
             store={stone.store}
-            onClick={() => {
-              if (!stone.isInStore) {
-                state.holes[stone.holeIndex.row][stone.holeIndex.col].ref?.click();
-              }
-            }}
           />
         );
       }
@@ -431,14 +432,14 @@ const Board = ({ className, onError }: BoardProps) => {
         <PlayableArea className={"playable-area"}>
           <Store
             isTop={true}
-            stones={state.stores[0].score}
+            stones={stateRef.current.stores[0].score}
             ref={addStoreZeroRef}
             className={"player0-store-section"}
           />
           {renderHoles()}
           <Store
             isTop={false}
-            stones={state.stores[1].score}
+            stones={stateRef.current.stores[1].score}
             ref={addStoreOneRef}
             className={"player1-store-section"}
           />
