@@ -39,6 +39,7 @@ interface HoleProps {
 }
 
 const Hole = React.forwardRef<HTMLDivElement, HoleProps>((props, ref) => {
+  console.log("render hole...");
   return (
     <Container style={{ flexDirection: props.counterOnTop ? "column-reverse" : "column" }}>
       <Pit

@@ -34,9 +34,10 @@
   },
   "scripts": {
     "test": "react-scripts test",
-    "build": "tsc --build --verbose",
+    "build": "react-scripts build",
     "console-game": "npm run build && node dist/src/console-game.js",
-    "start": "react-scripts start"
+    "start": "npm run build && serve -s build",
+    "dev": "react-scripts start"
   },
   "eslintConfig": {
     "extends": [
@@ -57,6 +58,6 @@
     ]
   },
   "keywords": [],
-  "author": "",
+  "author": "juniorerico",
   "license": "ISC"
 }

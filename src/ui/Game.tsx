@@ -13,6 +13,7 @@ import { initialState } from "../state/state";
 import { ActionType } from "../state/actions";
 import { GameContext } from "../state/context";
 import Dialog from "./Dialog";
+import { useCallback } from "react";
 
 const Container = styled.div`
   width: 100%;
@@ -71,6 +72,11 @@ function Game() {
     setAnchorEl(null);
   };
 
+  const onError = useCallback((message) => {
+    setShowAlert(true);
+    setAlertMessage(message);
+  }, []);
+
   function update() {
     // create the --vh variable in css for calculating the right height fo mobile phone
     // This should move to another place, for sure.
@@ -107,13 +113,7 @@ function Game() {
           <StyledMenuItem onClick={handleReset}>{"Reset Game"}</StyledMenuItem>
         </StyledMenu>
 
-        <Board
-          className="board"
-          onError={(message) => {
-            setShowAlert(true);
-            setAlertMessage(message);
-          }}
-        />
+        <Board className="board" onError={onError} />
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
           open={showAlert}

@@ -40,7 +40,8 @@ interface StoneProps {
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
-const Stone = React.forwardRef<HTMLDivElement, StoneProps>((props, ref) => {
+const Stone = (props: StoneProps) => {
+  console.log("Render Stone...");
   const { state } = useContext(GameContext);
   const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
 
@@ -49,10 +50,7 @@ const Stone = React.forwardRef<HTMLDivElement, StoneProps>((props, ref) => {
       if (props.isInStore && props.store !== -1) {
         const store = state.stores[props.store].ref;
         if (store) {
-          console.log("going to store: " + props.store);
           setPosition(getRandomPositionInStore(store.getBoundingClientRect(), props.store));
-        } else {
-          console.log("no store");
         }
       } else if (props.holeIndex.row !== -1) {
         const hole = state.holes[props.holeIndex.row][props.holeIndex.col].ref;
@@ -69,7 +67,7 @@ const Stone = React.forwardRef<HTMLDivElement, StoneProps>((props, ref) => {
     return () => {
       window.removeEventListener("resize", update);
     };
-  }, [props.holeIndex, props.store, state.stones[props.index]]);
+  }, [props.holeIndex, props.store]);
 
   /**
    * Get a random position inside a hole that fits a stone
@@ -139,7 +137,6 @@ const Stone = React.forwardRef<HTMLDivElement, StoneProps>((props, ref) => {
 
   return (
     <Container
-      ref={ref}
       className={props.className}
       style={{
         backgroundColor: props.color,
@@ -149,8 +146,8 @@ const Stone = React.forwardRef<HTMLDivElement, StoneProps>((props, ref) => {
       isClickable={props.isClickable}
       animationDelay={props.animationDelay}
       onClick={props.onClick}
-    ></Container>
+    />
   );
-});
+};
 
 export default React.memo(Stone);

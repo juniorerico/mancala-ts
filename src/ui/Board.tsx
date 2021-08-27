@@ -66,6 +66,7 @@ interface BoardProps {
 }
 
 const Board = ({ className, onError }: BoardProps) => {
+  console.log("render board...");
   const { state, dispatch } = useContext(GameContext);
   const [isRotated, setIsRotated] = useState(false);
   const [imageSize, setImageSize] = useState<Size>({ height: 0, width: 0 });
@@ -387,24 +388,25 @@ const Board = ({ className, onError }: BoardProps) => {
    */
   function renderStones(): React.ReactNode {
     return state.stones.map((stone, i) => {
-      return (
-        <Stone
-          index={i}
-          key={`stone-${i}`}
-          className={"stone " + stone.holeIndex.row + "-" + stone.holeIndex.col}
-          color={stone.color}
-          animationDelay={stone.animationDelay}
-          holeIndex={stone.holeIndex}
-          isClickable={stone.holeIndex.row == 1}
-          isInStore={stone.isInStore}
-          store={stone.store}
-          onClick={() => {
-            if (!stone.isInStore) {
-              state.holes[stone.holeIndex.row][stone.holeIndex.col].ref?.click();
-            }
-          }}
-        />
-      );
+      if (!isLoading && state.holes[stone.holeIndex.row][stone.holeIndex.col].ref !== null) {
+        return (
+          <Stone
+            index={i}
+            key={i}
+            color={stone.color}
+            animationDelay={stone.animationDelay}
+            holeIndex={stone.holeIndex}
+            isClickable={stone.holeIndex.row === 1}
+            isInStore={stone.isInStore}
+            store={stone.store}
+            onClick={() => {
+              if (!stone.isInStore) {
+                state.holes[stone.holeIndex.row][stone.holeIndex.col].ref?.click();
+              }
+            }}
+          />
+        );
+      }
     });
   }
 
@@ -442,9 +444,9 @@ const Board = ({ className, onError }: BoardProps) => {
           />
         </PlayableArea>
       </Container>
-      {isLoading ? <></> : <div className={"stones-wrapper"}>{renderStones()}</div>}
+      <div className={"stones-wrapper"}>{renderStones()}</div>
     </>
   );
 };
 
-export default Board;
+export default React.memo(Board);
